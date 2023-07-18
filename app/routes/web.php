@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\DisplayController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -11,6 +13,16 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Route::get('/', function () {
+//     return view('login');
+// });
+
+Auth::routes();
+
+Route::group(['middleware' => 'auth'], function() {
+
+    Route::get('/', [DisplayController::class,'login'])->name('login');
+    Route::get('/home', [DisplayController::class,'index'])->name('login');
+
 });
+
