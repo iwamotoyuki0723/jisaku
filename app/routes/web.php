@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DisplayController;
+use App\Http\Controllers\RegistrationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,12 +18,14 @@ use App\Http\Controllers\DisplayController;
 //     return view('login');
 // });
 
+Route::get('/', [DisplayController::class,'index'])->name('home');
+
 Auth::routes();
 
-Route::group(['middleware' => 'auth'], function() {
+Route::get('/login', [RegistrationController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [RegistrationController::class, 'login']);
 
-    Route::get('/', [DisplayController::class,'login'])->name('login');
-    Route::get('/home', [DisplayController::class,'index'])->name('login');
 
-});
+
+
 

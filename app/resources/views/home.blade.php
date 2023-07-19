@@ -45,19 +45,43 @@
             font-size: 18px;
             cursor: pointer;
         }
+        .login-buttons {
+            display: flex;
+            gap: 20px;
+        }
+        .login-button {
+            padding: 20px 30px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    
     <!-- メニューバー -->
     <nav class="navbar fixed-top">
         <a href="#" class="navbar-brand">文具管理システム</a>
+        @if(auth()->check()) <!-- ログインしている場合 -->
         <div class="logout-btn">
             <a href="#">ユーザー管理</a>
             <a href="#">ログアウト</a>
         </div>
+        @else <!-- ログインしていない場合 -->
+        <div class="logout-btn">
+            <div class="login-buttons">
+                <a href="{{ route('login') }}">ログイン</a>
+                <a href="#">会員登録</a>
+            </div>
+        </div>
+        @endif
     </nav>
 
     <!-- トップ画面コンテンツ -->
+    @if(auth()->check()) <!-- ログインしている場合 -->
     <div class="content">
         <div class="menu-buttons">
             <button class="menu-button">在庫管理</button>
@@ -65,6 +89,7 @@
             <button class="menu-button">商品管理</button>
         </div>
     </div>
+    @endif
 
     <!-- Bootstrap の JavaScript ファイルを読み込む（オプション） -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>

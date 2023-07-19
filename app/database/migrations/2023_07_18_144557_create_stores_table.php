@@ -18,6 +18,8 @@ class CreateStoresTable extends Migration
             $table->string('name','255');
             $table->string('location','255');
             $table->string('phone','255');
+            $table->integer('store_id');
+            $table->boolean('is_admin')->default(FALSE);
             $table->timestamps();
         });
     }

@@ -18,8 +18,7 @@ class CreateUserTable extends Migration
             $table->string('name','255');
             $table->string('email','255');
             $table->string('password','255');
-            $table->integer('store_id');
-            $table->boolean('is_admin')->default(FALSE);
+            
             $table->timestamps();
         });
     }
