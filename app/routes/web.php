@@ -18,14 +18,16 @@ use App\Http\Controllers\RegistrationController;
 //     return view('login');
 // });
 
+
+
+
 Route::get('/', [DisplayController::class,'index'])->name('home');
+
+Route::get('/useradd', [DisplayController::class, 'useradd'])->name('user.add');
+Route::get('/inventory', [DisplayController::class, 'inventory'])->name('inventory');
+Route::post('/inventory/search', [DisplayController::class, 'search'])->name('inventory.search');
+
 
 Auth::routes();
 
-Route::get('/login', [RegistrationController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [RegistrationController::class, 'login']);
-
-
-
-
-
+Route::get('/home', 'HomeController@index')->name('home');

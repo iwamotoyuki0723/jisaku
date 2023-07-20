@@ -1,97 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文具管理システム</title>
-    <!-- Bootstrap CSS を読み込む（オプション） -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- メニューバーのスタイル -->
-    <style>
-        body {
-            padding-top: 70px; /* メニューバーの高さ分の余白を作成 */
-        }
-        .navbar {
-            background-color: #333;
-            color: #fff;
-        }
-        .navbar a {
-            color: #fff;
-            text-decoration: none;
-            margin-right: 10px;
-        }
-        .navbar a:hover {
-            color: #ddd;
-        }
-        .navbar .logout-btn {
-            margin-left: auto;
-        }
-        .content {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: calc(100vh - 70px); /* 画面の高さからメニューバーの高さを引いた分の余白を作成 */
-        }
-        .menu-buttons {
-            display: flex;
-            gap: 20px;
-        }
-        .menu-button {
-            padding: 20px 30px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        .login-buttons {
-            display: flex;
-            gap: 20px;
-        }
-        .login-button {
-            padding: 20px 30px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    
-    <!-- メニューバー -->
-    <nav class="navbar fixed-top">
-        <a href="#" class="navbar-brand">文具管理システム</a>
-        @if(auth()->check()) <!-- ログインしている場合 -->
-        <div class="logout-btn">
-            <a href="#">ユーザー管理</a>
-            <a href="#">ログアウト</a>
-        </div>
-        @else <!-- ログインしていない場合 -->
-        <div class="logout-btn">
-            <div class="login-buttons">
-                <a href="{{ route('login') }}">ログイン</a>
-                <a href="#">会員登録</a>
-            </div>
-        </div>
-        @endif
-    </nav>
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
 
     <!-- トップ画面コンテンツ -->
-    @if(auth()->check()) <!-- ログインしている場合 -->
     <div class="content">
         <div class="menu-buttons">
-            <button class="menu-button">在庫管理</button>
-            <button class="menu-button">入庫予定管理</button>
-            <button class="menu-button">商品管理</button>
+            <a href="{{ route('inventory') }}" class="menu-button" style="background-color: #ff6f69; padding: 30px 50px; font-size: 24px;">在庫管理</a>
+            <a href="#" class="menu-button" style="background-color: #ffcc5c; padding: 30px 50px; font-size: 24px;">入庫予定管理</a>
+            <a href="#" class="menu-button" style="background-color: #88d8b0; padding: 30px 50px; font-size: 24px;">商品管理</a>
+            <a href="{{ route('user.add') }}" class="menu-button" style="background-color: #b0c4de; padding: 30px 50px; font-size: 24px;">ユーザー追加</a>
         </div>
     </div>
-    @endif
+</div>
+@endsection
 
-    <!-- Bootstrap の JavaScript ファイルを読み込む（オプション） -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-</body>
-</html>
+<!-- スタイルシートの追加 -->
+@push('styles')
+<style>
+    body {
+        padding-top: 70px; /* メニューバーの高さ分の余白を作成 */
+    }
+    .navbar {
+        background-color: #333;
+        color: #fff;
+    }
+    .navbar a {
+        color: #fff;
+        text-decoration: none;
+        margin-right: 10px;
+    }
+    .navbar a:hover {
+        color: #ddd;
+    }
+    .navbar .logout-btn {
+        margin-left: auto;
+    }
+    .content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 70px); /* 画面の高さからメニューバーの高さを引いた分の余白を作成 */
+    }
+    .menu-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px; /* ボタンの上に余白を作成 */
+    }
+    .menu-button {
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 300px;
+        text-align: center;
+    }
+</style>
+@endpush
+
