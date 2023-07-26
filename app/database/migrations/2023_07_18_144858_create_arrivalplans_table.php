@@ -20,7 +20,7 @@ class CreateArrivalplansTable extends Migration
             $table->date('plammed_date');
             $table->integer('quantity');
             $table->decimal('weight')->default(0);
-            $table->boolean('is_confirmed')->default(FALSE);
+            $table->boolean('is_confirmed')->default(false);
             $table->timestamps();
         });
     }

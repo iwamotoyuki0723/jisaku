@@ -52,6 +52,7 @@
                         <th>日付</th>
                         <th>数量</th>
                         <th>コメント</th>
+                        <th>詳細</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,6 +64,9 @@
                         <td>{{ $inventory->date }}</td>
                         <td>{{ $inventory->amount }}</td>
                         <td>{{ $inventory->comment }}</td>
+                        <td>
+                            <a href="#" class="btn btn-info">詳細</a>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
