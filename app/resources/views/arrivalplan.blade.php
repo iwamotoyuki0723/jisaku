@@ -37,7 +37,10 @@
                         <td>{{ $plan->product_name }}</td>
                         <td>{{ $plan->planned_date }}</td>
                         <td>
-                            <button class="btn btn-success">入荷確定</button>
+                            <form action="{{ route('confirm.arrivalplans', ['id' => $plan->id]) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-success">入荷確定</button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach

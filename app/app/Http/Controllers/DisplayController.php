@@ -22,7 +22,7 @@ class DisplayController extends Controller
         return view('home');
     }
 
-    // ユーザー追加
+    // ユーザー追加画面
     public function useradd() {
 
         $users = User::Where('is_admin' , 1)->get();
@@ -30,11 +30,73 @@ class DisplayController extends Controller
 
     }
 
+    // ユーザー追加処理
+    public function addUser(Request $request) {
+
+        $users = new User;
+
+        $users->name = $request->name;
+        $users->email = $request->email;
+        $users->password = $request->password;
+        if($request->store == '店舗A'){
+            $users->store_id = 1;
+        }else if($request->store == '店舗B'){
+            $users->store_id = 2;
+        }else if($request->store == '店舗C'){
+            $users->store_id = 3;
+        }
+        $users->is_admin = 1;
+
+        $users->save();
+
+        return redirect()->route('home');
+
+    }
+
+    // ユーザー検索
+    public function userSearch(Request $request)
+    {
+        $date = $request->input('store');
+        if($date == "店舗A"){
+            $date = 1;
+            // 日付でユーザーを検索
+            $users = User::where('store_id', $date)->get();
+
+        }else if($date == "店舗B"){
+            $date = 2;
+            // 日付でユーザーを検索
+             $users = User::where('store_id', $date)->get();
+
+        }else if($date == "店舗C"){
+            $date = 3;
+            // 日付でユーザーを検索
+            $users = User::where('store_id', $date)->get();
+        
+        }else {
+            $users = User::all();
+        }
+
+
+        // ビューにデータを渡す
+        return view('useradd', ['users' => $users]);
+        
+    }
+
     // 在庫管理
     public function inventory() {
 
-        $inventorys = Inventory::all();
-        return view('inventory', compact('inventorys'));
+        $inventories = Inventory::all();
+
+        $inventoryNames = [];
+        foreach ($inventories as $inventorys) {
+            $product = Product::find($inventorys->product_id);
+            if ($product) {
+                $inventorys->product_name = $product->name;
+                $inventoryNames[] = $inventorys;
+            }
+        }
+
+        return view('inventory', ['inventorys' => $inventoryNames]);
 
     }
 
@@ -88,21 +150,21 @@ class DisplayController extends Controller
     {
         $date = $request->input('date');
 
-    // 日付で入荷予定を検索
-    $arrivalplans = ArrivalPlan::where('planned_date', $date)->get();
+        // 日付で入荷予定を検索
+        $arrivalplans = ArrivalPlan::where('planned_date', $date)->get();
 
-    // productsテーブルから対応する商品名を取得して、配列に追加
-    $arrivalplansWithProductNames = [];
-    foreach ($arrivalplans as $arrivalplan) {
-        $product = Product::find($arrivalplan->product_id);
-        if ($product) {
-            $arrivalplan->product_name = $product->name;
-            $arrivalplansWithProductNames[] = $arrivalplan;
+        // productsテーブルから対応する商品名を取得して、配列に追加
+        $arrivalplansWithProductNames = [];
+        foreach ($arrivalplans as $arrivalplan) {
+            $product = Product::find($arrivalplan->product_id);
+            if ($product) {
+                $arrivalplan->product_name = $product->name;
+                $arrivalplansWithProductNames[] = $arrivalplan;
+            }
         }
-    }
 
-    // ビューにデータを渡す
-    return view('arrivalplan', ['arrivalplans' => $arrivalplansWithProductNames]);
+        // ビューにデータを渡す
+        return view('arrivalplan', ['arrivalplans' => $arrivalplansWithProductNames]);
         
     }
 
@@ -118,19 +180,6 @@ class DisplayController extends Controller
     // 入荷予定追加
     public function arrivalplanadd(Request $request)
     {
-        // // 入力された情報をバリデーション（適切なフォーマットかどうか）する
-        // $validatedData = $request->validate([
-        //     'name' => 'required|string|max:255',
-        //     'planned_date' => 'required|date',
-        //     'quantity' => 'required|integer|min:1',
-        //     'weight' => 'required|numeric|min:0',
-        // ]);
-
-        // // バリデーションを通過した場合、データベースに登録
-        // ArrivalPlan::create($validatedData);
-
-        // // 登録後にリダイレクトする先を指定する（ここでは入荷予定一覧画面にリダイレクト）
-        // return redirect()->route('arrivalplan');
 
         $arrivalplan = new Arrivalplan;
 
@@ -142,6 +191,25 @@ class DisplayController extends Controller
         $arrivalplan->save();
 
         return redirect()->route('arrivalplan');
+    }
+
+    // 入荷確定処理
+    public function confirmArrivalplan(Request $request, $id) {
+
+        $arrivalPlan = ArrivalPlan::findOrFail($id);
+
+        $inventory = new Inventory();
+        $inventory->product_id = $arrivalPlan->product_id;
+        // $inventory->store_id = $arrivalPlan->store_id;
+        $inventory->quantity = $arrivalPlan->quantity;
+        $inventory->weight = $arrivalPlan->weight;
+
+        $inventory->save();
+
+        $arrivalPlan->delete();
+
+        return redirect()->route('home');
+
     }
 
     // 商品管理
@@ -168,17 +236,47 @@ class DisplayController extends Controller
         $product->name = $request->product_name;
         $product->weight = $request->weight;
 
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageFileName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('images'), $imageFileName);
+            $product->image = 'images/' . $imageFileName;
+        }
+
         $product->save();
 
         return redirect()->route('product');
     }
 
     // 商品編集
-    public function editproduct(Request $request)
+    public function editproduct(int $productId)
     {
 
-        return view('editInventory');
+        $products = Product::find($productId);
 
+        return view('editInventory', compact('products'));
+
+    }
+
+    // 商品編集処理
+    public function productedit(Request $request, $id)
+    {
+
+        $product = Product::find($id);
+
+        $product->name = $request->product_name;
+        $product->weight = $request->weight;
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageFileName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('images'), $imageFileName);
+            $product->image = 'images/' . $imageFileName;
+        }
+
+        $product->save();
+
+        return redirect()->route('product');
     }
 
 }

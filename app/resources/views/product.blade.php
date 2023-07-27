@@ -13,6 +13,7 @@
                         <th>ID</th>
                         <th>商品名</th>
                         <th>重量</th>
+                        <th>画像</th>
                         <th>編集</th>
                     </tr>
                 </thead>
@@ -22,8 +23,9 @@
                         <td>{{ $product->id }}</td>
                         <td>{{ $product->name }}</td>
                         <td>{{ $product->weight }}</td>
+                        <td><img src="{{ asset($product->image) }}" class="img-thumbnail" alt="商品画像" style="width: 50px; height: 50px;"></td>
                         <td>
-                            <a href="{{ route('products.edit', ['product_id' => $product->id]) }}" class="btn btn-info">編集</a>
+                            <a href="{{ route('products.edit', ['product_id' => $product->id]) }}" class="btn btn-success">編集</a>
                         </td>
                     </tr>
                     @endforeach

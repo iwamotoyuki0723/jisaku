@@ -19,7 +19,7 @@
                 </div>
                 <div class="form-group">
                     <label for="image">画像</label>
-                    <input type="text" name="image" id="image" class="form-control-file" required>
+                    <input type="file" name="image" id="image" class="form-control-file" required>
                 </div>
                 <button type="submit" class="btn btn-primary">登録</button>
             </form>
