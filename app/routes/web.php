@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\DisplayController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,9 +42,17 @@ Route::post('/arrivalplan/search', [DisplayController::class, 'arrivalplansearch
 Route::get('/arrivalplan/create', [DisplayController::class, 'arrivalplancreate'])->name('arrivalplans.create');
 Route::post('/arrivalplan', [DisplayController::class, 'arrivalplanadd'])->name('arrivalplans.add');
 Route::post('/arrivalplan/{id}/confirm', [DisplayController::class, 'confirmArrivalplan'])->name('confirm.arrivalplans');
+Route::get('/arrivalplans/clear', [DisplayController::class, 'clearArrivalplan'])->name('arrivalplans.clear');
 
 Route::get('/product', [DisplayController::class, 'product'])->name('product');
 Route::get('/product/create', [DisplayController::class, 'productcreate'])->name('products.create');
 Route::post('/product/add', [DisplayController::class, 'productadd'])->name('products.add');
 Route::get('/product/edit/{product_id}', [DisplayController::class, 'editproduct'])->name('products.edit');
 Route::post('/product/edit/{product_id}', [DisplayController::class, 'productedit'])->name('products.editprocess');
+
+Route::get('get_product_detail', [DisplayController::class, 'getProductDetail'])->name('get.product.detail');
+
+Route::get('password/reset', 'App\Http\Controllers\Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+Route::post('password/email', 'App\Http\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+Route::get('password/reset/{token}', 'App\Http\Controllers\Auth\ResetPasswordController@showResetForm')->name('password.reset');
+Route::post('password/reset', 'App\Http\Controllers\Auth\ResetPasswordController@reset')->name('password.update');

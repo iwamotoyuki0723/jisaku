@@ -8,8 +8,8 @@
         <div class="menu-buttons">
             <a href="{{ route('inventory') }}" class="menu-button" style="background-color: #ff6f69; padding: 30px 50px; font-size: 24px;">在庫管理</a>
             <a href="{{ route('arrivalplan') }}" class="menu-button" style="background-color: #ffcc5c; padding: 30px 50px; font-size: 24px;">入庫予定管理</a>
-            <a href="{{ route('product') }}" class="menu-button" style="background-color: #88d8b0; padding: 30px 50px; font-size: 24px;">商品管理</a>
             @if(Auth::user()->is_admin == 0)
+            <a href="{{ route('product') }}" class="menu-button" style="background-color: #88d8b0; padding: 30px 50px; font-size: 24px;">商品管理</a>
             <a href="{{ route('user.add') }}" class="menu-button" style="background-color: #b0c4de; padding: 30px 50px; font-size: 24px;">ユーザー追加</a>
             @endif
         </div>

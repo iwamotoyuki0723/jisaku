@@ -83,21 +83,30 @@ class DisplayController extends Controller
     }
 
     // 在庫管理
-    public function inventory() {
+    public function inventory()
+    {
+        // ログインしているユーザーの管理権限をチェック
+        $isAdmin = Auth::user()->is_admin;
 
-        $inventories = Inventory::all();
+        if ($isAdmin) {
+            // 管理ユーザーは全ての店舗の在庫を取得
+            $inventories = Inventory::all();
+        } else {
+            // 一般ユーザーは自分の店舗IDに対応する在庫のみ取得
+            $storeId = Auth::user()->store_id;
+            $inventories = Inventory::where('store_id', $storeId)->get();
+        }
 
         $inventoryNames = [];
-        foreach ($inventories as $inventorys) {
-            $product = Product::find($inventorys->product_id);
+        foreach ($inventories as $inventory) {
+            $product = Product::find($inventory->product_id);
             if ($product) {
-                $inventorys->product_name = $product->name;
-                $inventoryNames[] = $inventorys;
+                $inventory->product_name = $product->name;
+                $inventoryNames[] = $inventory;
             }
         }
 
-        return view('inventory', ['inventorys' => $inventoryNames]);
-
+        return view('inventory', ['inventories' => $inventoryNames]);
     }
 
     // 在庫検索
@@ -127,6 +136,16 @@ class DisplayController extends Controller
         return view('inventory', compact('inventories'));
     }
 
+    // 在庫商品モーダル
+    public function getProductDetail(Request $request)
+    {
+        $productId = $request->input('product_id');
+        $inventory = Product::findOrFail($productId);
+        // 商品詳細情報を取得するためのビューを返す
+        return view('product_detail_modal', ['inventory' => $inventory]);
+    }
+
+
     // 入荷予定一覧
     public function arrivalplan() {
 
@@ -146,26 +165,74 @@ class DisplayController extends Controller
     }
 
     // 入荷予定検索
+    // public function arrivalplansearch(Request $request)
+    // {
+    //     $date = $request->input('date');
+
+    //     // 日付で入荷予定を検索
+    //     $arrivalplans = ArrivalPlan::where('planned_date', $date)->get();
+
+    //     // productsテーブルから対応する商品名を取得して、配列に追加
+    //     $arrivalplansWithProductNames = [];
+    //     foreach ($arrivalplans as $arrivalplan) {
+    //         $product = Product::find($arrivalplan->product_id);
+    //         if ($product) {
+    //             $arrivalplan->product_name = $product->name;
+    //             $arrivalplansWithProductNames[] = $arrivalplan;
+    //         }
+    //     }
+
+    //     // ビューにデータを渡す
+    //     return view('arrivalplan', ['arrivalplans' => $arrivalplansWithProductNames]);
+        
+    // }
+
     public function arrivalplansearch(Request $request)
     {
-        $date = $request->input('date');
+        $query = ArrivalPlan::query();
 
-        // 日付で入荷予定を検索
-        $arrivalplans = ArrivalPlan::where('planned_date', $date)->get();
+        // 商品名が入力されている場合は検索条件に追加
+        if ($request->filled('name')) {
+            $productId = Product::where('name', 'like', '%' . $request->input('name') . '%')->pluck('id');
+            $query->whereIn('product_id', $productId);
+        }
 
-        // productsテーブルから対応する商品名を取得して、配列に追加
-        $arrivalplansWithProductNames = [];
+        // 予定日が入力されている場合は検索条件に追加
+        if ($request->filled('date')) {
+            $query->where('planned_date', '>=', $request->input('date'));
+        }
+
+        // 検索結果を取得
+        $arrivalplans = $query->get();
+
+        $arrivalplansNames = [];
         foreach ($arrivalplans as $arrivalplan) {
             $product = Product::find($arrivalplan->product_id);
             if ($product) {
                 $arrivalplan->product_name = $product->name;
-                $arrivalplansWithProductNames[] = $arrivalplan;
+                $arrivalplansNames[] = $arrivalplan;
             }
         }
 
-        // ビューにデータを渡す
-        return view('arrivalplan', ['arrivalplans' => $arrivalplansWithProductNames]);
-        
+        return view('arrivalplan', ['arrivalplans' => $arrivalplansNames]);
+    }
+
+    // 入荷予定一覧検索クリア
+    public function clearArrivalplan()
+    {
+        // 入荷予定一覧を全て取得してビューに渡す
+        $arrivalplans = Arrivalplan::all();
+
+        $arrivalplansNames = [];
+        foreach ($arrivalplans as $arrivalplan) {
+            $product = Product::find($arrivalplan->product_id);
+            if ($product) {
+                $arrivalplan->product_name = $product->name;
+                $arrivalplansNames[] = $arrivalplan;
+            }
+        }
+
+        return view('arrivalplan', ['arrivalplans' => $arrivalplansNames]);
     }
 
     //　入荷予定登録
@@ -194,22 +261,33 @@ class DisplayController extends Controller
     }
 
     // 入荷確定処理
-    public function confirmArrivalplan(Request $request, $id) {
-
+        public function confirmArrivalplan(Request $request, $id)
+    {
+        // 入荷予定を取得
         $arrivalPlan = ArrivalPlan::findOrFail($id);
 
-        $inventory = new Inventory();
-        $inventory->product_id = $arrivalPlan->product_id;
-        // $inventory->store_id = $arrivalPlan->store_id;
-        $inventory->quantity = $arrivalPlan->quantity;
-        $inventory->weight = $arrivalPlan->weight;
+        // 在庫を検索
+        $inventory = Inventory::where('product_id', $arrivalPlan->product_id)->first();
 
+        // 在庫が存在しない場合は新しく作成
+        if (!$inventory) {
+            $inventory = new Inventory();
+            $inventory->product_id = $arrivalPlan->product_id;
+            $inventory->quantity = $arrivalPlan->quantity;
+            $inventory->weight = $arrivalPlan->weight;
+        } else {
+            // 在庫が既に存在する場合は数量と重量を加算
+            $inventory->quantity += $arrivalPlan->quantity;
+            $inventory->weight += $arrivalPlan->weight;
+        }
+
+        // 在庫を保存
         $inventory->save();
 
+        // 入荷予定を削除
         $arrivalPlan->delete();
 
         return redirect()->route('home');
-
     }
 
     // 商品管理
