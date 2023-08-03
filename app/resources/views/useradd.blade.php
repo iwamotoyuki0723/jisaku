@@ -18,6 +18,8 @@
                                     <option value="店舗A">店舗A</option>
                                     <option value="店舗B">店舗B</option>
                                     <option value="店舗C">店舗C</option>
+                                    <option value="店舗D">店舗D</option>
+                                    <option value="店舗E">店舗E</option>
                                 </select>
                             </div>
                         </div>

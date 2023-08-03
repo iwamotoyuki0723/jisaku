@@ -12,6 +12,9 @@ use App\Product;
 
 use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Hash;
+
+
 
 class DisplayController extends Controller
 {
@@ -37,13 +40,17 @@ class DisplayController extends Controller
 
         $users->name = $request->name;
         $users->email = $request->email;
-        $users->password = $request->password;
+        $users->password = Hash::make($request->password);
         if($request->store == '店舗A'){
             $users->store_id = 1;
         }else if($request->store == '店舗B'){
             $users->store_id = 2;
         }else if($request->store == '店舗C'){
             $users->store_id = 3;
+        }else if($request->store == '店舗D'){
+            $users->store_id = 4;
+        }else if($request->store == '店舗E'){
+            $users->store_id = 5;
         }
         $users->is_admin = 1;
 
@@ -88,7 +95,7 @@ class DisplayController extends Controller
         // ログインしているユーザーの管理権限をチェック
         $isAdmin = Auth::user()->is_admin;
 
-        if ($isAdmin) {
+        if ($isAdmin == 0) {
             // 管理ユーザーは全ての店舗の在庫を取得
             $inventories = Inventory::all();
         } else {
@@ -139,17 +146,21 @@ class DisplayController extends Controller
     // 在庫商品モーダル
     public function getProductDetail(Request $request)
     {
-        $productId = $request->input('product_id');
+        $productId = $request->product_id;
         $inventory = Product::findOrFail($productId);
         // 商品詳細情報を取得するためのビューを返す
-        return view('product_detail_modal', ['inventory' => $inventory]);
+        return response()->json($inventory);
     }
 
 
     // 入荷予定一覧
     public function arrivalplan() {
 
-        $arrivalplans = Arrivalplan::all();
+        // ログインしているユーザーのstore_idを取得
+        $storeId = Auth::user()->store_id;
+
+        // ユーザーのstore_idに対応するアイテムをデータベースから取得
+        $arrivalplans = Arrivalplan::where('store_id', $storeId)->get();
 
         $arrivalplansNames = [];
         foreach ($arrivalplans as $arrivalplan) {
@@ -165,28 +176,6 @@ class DisplayController extends Controller
     }
 
     // 入荷予定検索
-    // public function arrivalplansearch(Request $request)
-    // {
-    //     $date = $request->input('date');
-
-    //     // 日付で入荷予定を検索
-    //     $arrivalplans = ArrivalPlan::where('planned_date', $date)->get();
-
-    //     // productsテーブルから対応する商品名を取得して、配列に追加
-    //     $arrivalplansWithProductNames = [];
-    //     foreach ($arrivalplans as $arrivalplan) {
-    //         $product = Product::find($arrivalplan->product_id);
-    //         if ($product) {
-    //             $arrivalplan->product_name = $product->name;
-    //             $arrivalplansWithProductNames[] = $arrivalplan;
-    //         }
-    //     }
-
-    //     // ビューにデータを渡す
-    //     return view('arrivalplan', ['arrivalplans' => $arrivalplansWithProductNames]);
-        
-    // }
-
     public function arrivalplansearch(Request $request)
     {
         $query = ArrivalPlan::query();
@@ -254,6 +243,7 @@ class DisplayController extends Controller
         $arrivalplan->planned_date = $request->planned_date;
         $arrivalplan->quantity = $request->quantity;
         $arrivalplan->weight = $request->weight;
+        $arrivalplan->store_id = Auth::user()->store_id;
 
         $arrivalplan->save();
 
@@ -267,7 +257,9 @@ class DisplayController extends Controller
         $arrivalPlan = ArrivalPlan::findOrFail($id);
 
         // 在庫を検索
-        $inventory = Inventory::where('product_id', $arrivalPlan->product_id)->first();
+        $inventory = Inventory::where('product_id', $arrivalPlan->product_id)
+        ->where('store_id', $arrivalPlan->store_id)
+        ->first();
 
         // 在庫が存在しない場合は新しく作成
         if (!$inventory) {
@@ -275,6 +267,7 @@ class DisplayController extends Controller
             $inventory->product_id = $arrivalPlan->product_id;
             $inventory->quantity = $arrivalPlan->quantity;
             $inventory->weight = $arrivalPlan->weight;
+            $inventory->store_id = Auth::user()->store_id;
         } else {
             // 在庫が既に存在する場合は数量と重量を加算
             $inventory->quantity += $arrivalPlan->quantity;
@@ -355,6 +348,13 @@ class DisplayController extends Controller
         $product->save();
 
         return redirect()->route('product');
+    }
+
+    // ログアウト
+    public function logout()
+    {
+        Auth::logout();
+        return redirect()->route('login');
     }
 
 }
