@@ -8,6 +8,7 @@ use App\User;
 use App\Inventory;
 use App\Arrivalplan;
 use App\Product;
+use App\Store;
 
 
 use Illuminate\Support\Facades\Auth;
@@ -28,65 +29,71 @@ class DisplayController extends Controller
     // ユーザー追加画面
     public function useradd() {
 
-        $users = User::Where('is_admin' , 1)->get();
-        return view('useradd', compact('users'));
+        $stores = Store::all(); 
+        $users = User::where('is_admin', 1)->get();
+        return view('useradd', compact('users', 'stores')); 
 
     }
 
     // ユーザー追加処理
     public function addUser(Request $request) {
-
-        $users = new User;
-
-        $users->name = $request->name;
-        $users->email = $request->email;
-        $users->password = Hash::make($request->password);
-        if($request->store == '店舗A'){
-            $users->store_id = 1;
-        }else if($request->store == '店舗B'){
-            $users->store_id = 2;
-        }else if($request->store == '店舗C'){
-            $users->store_id = 3;
-        }else if($request->store == '店舗D'){
-            $users->store_id = 4;
-        }else if($request->store == '店舗E'){
-            $users->store_id = 5;
-        }
-        $users->is_admin = 1;
-
-        $users->save();
-
+        $user = new User;
+    
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+    
+        // 選択された店舗名から対応する store レコードを取得
+        $selectedStore = Store::where('id', $request->store)->first();
+    
+        if ($selectedStore) {
+            $user->store_id = $selectedStore->id; // 対応する store_id を設定
+        } 
+    
+        $user->is_admin = 1;
+    
+        $user->save();
+    
         return redirect()->route('home');
-
     }
+    
 
     // ユーザー検索
     public function userSearch(Request $request)
     {
+        $stores = Store::all(); 
+
         $date = $request->input('store');
-        if($date == "店舗A"){
-            $date = 1;
-            // 日付でユーザーを検索
-            $users = User::where('store_id', $date)->get();
+        $store = Store::where('id', $date)->first();
 
-        }else if($date == "店舗B"){
-            $date = 2;
-            // 日付でユーザーを検索
-             $users = User::where('store_id', $date)->get();
-
-        }else if($date == "店舗C"){
-            $date = 3;
-            // 日付でユーザーを検索
-            $users = User::where('store_id', $date)->get();
-        
-        }else {
+        if ($store) {
+            $storeID = $store->id;
+            // store_idでユーザーを検索
+            $users = User::where('store_id', $storeID)->get();
+        } else {
+            // 全ユーザーを取得
             $users = User::all();
         }
 
-
         // ビューにデータを渡す
-        return view('useradd', ['users' => $users]);
+        return view('useradd', compact('users', 'stores')); 
         
+    }
+
+    public function storeadd()
+    {
+        return view('storeadd');
+    }
+
+    public function Addstore(Request $request)
+    {
+        $store = new Store();
+        $store->name = $request->name;
+        $store->location = $request->address;
+        $store->phone = $request->phone;
+        $store->save();
+
+        return redirect()->route('home'); 
     }
 
     // 在庫管理

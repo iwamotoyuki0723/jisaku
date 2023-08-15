@@ -4,6 +4,7 @@ use App\Http\Controllers\DisplayController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\ResourceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,9 +33,16 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/home', 'HomeController@index')->name('home');
 
-    Route::get('/useradd', [DisplayController::class, 'useradd'])->name('user.add');
-    Route::post('/useradd', [DisplayController::class, 'addUser'])->name('user.add');
+    //ResourceController使用
+    Route::get('/useradd', [ResourceController::class, 'create'])->name('user.add');
+    Route::post('/useradd', [ResourceController::class, 'store'])->name('user.store');
+    //↑
+    // Route::get('/useradd', [DisplayController::class, 'useradd'])->name('user.add');
+    // Route::post('/useradd', [DisplayController::class, 'addUser'])->name('user.add');
     Route::post('/user/search', [DisplayController::class, 'userSearch'])->name('user.search');
+
+    Route::get('/store/add', [DisplayController::class, 'storeadd'])->name('store.add');
+    Route::post('/store', [DisplayController::class, 'Addstore'])->name('store.add');
 
     Route::get('/inventory', [DisplayController::class, 'inventory'])->name('inventory');
     Route::post('/inventory/search', [DisplayController::class, 'inventorysearch'])->name('inventory.search');
