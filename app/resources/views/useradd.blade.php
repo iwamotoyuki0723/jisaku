@@ -67,7 +67,7 @@
         <!-- ユーザー追加フォーム -->
         <div class="col-md-6">
             <h3>ユーザー追加</h3>
-            <form action="{{ route('user.add') }}" method="POST">
+            <form action="{{ route('user.store') }}" method="POST">
                 @csrf
                 <div class="form-group">
                     <label for="name">名前</label>

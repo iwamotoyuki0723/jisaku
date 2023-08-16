@@ -34,8 +34,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/home', 'HomeController@index')->name('home');
 
     //ResourceController使用
-    Route::get('/useradd', [ResourceController::class, 'create'])->name('user.add');
-    Route::post('/useradd', [ResourceController::class, 'store'])->name('user.store');
+    Route::resource('useradd', 'ResourceController')->only([
+        'create', 'store'
+    ])->names([
+        'create' => 'user.add', // ユーザー追加フォーム表示
+        'store' => 'user.store', // ユーザー追加処理
+    ]);
     //↑
     // Route::get('/useradd', [DisplayController::class, 'useradd'])->name('user.add');
     // Route::post('/useradd', [DisplayController::class, 'addUser'])->name('user.add');
